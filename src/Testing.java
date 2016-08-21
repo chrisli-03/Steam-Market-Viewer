@@ -4,27 +4,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public class Testing {
-
-	enum Games {
-		DOTA2(570);
-		
-		private int value;
-		private Games(int value) {
-			this.value = value;
-		}
-		
-		public String getValue() {
-			return Integer.toString(value);
-		}
-	};
-	
     public static void main(final String[] args) throws IOException {
         BufferedReader reader = null;
         try {
-        	String setName="Platinum%20Baby%20Roshan";
-        	String game = Games.DOTA2.getValue();
-            String name="http://steamcommunity.com/market/priceoverview/?appid="+game+"&market_hash_name="+ setName;
-            URL url = new URL(name);
+        	Request newRequest = new Request("Platinum%20Baby%20Roshan", "DOTA2");
+            URL url = new URL(newRequest.getUrl());
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             StringBuffer buffer = new StringBuffer();
             int read;
