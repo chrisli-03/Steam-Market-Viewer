@@ -43,7 +43,8 @@ public class SteamMarketViewer {
 		//frame.addComponentListener(controller);
 		
 		panel = new JPanel(new BorderLayout());
-		panel.add(toolbar);
+		panel.add(toolbar,BorderLayout.NORTH);
+		panel.add(view,BorderLayout.CENTER);
 		frame.add(panel);
 		frame.setVisible(true);
     	
