@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.Scanner; 
 
 public class Testing {
+<<<<<<< HEAD
 
 	enum Games {
 		DOTA2(570);
@@ -38,6 +39,13 @@ public class Testing {
         	String game = Games.DOTA2.getValue();
             String name="http://steamcommunity.com/market/priceoverview/?appid="+game+"&market_hash_name="+ setName;
             URL url = new URL(name);
+=======
+    public static void main(final String[] args) throws IOException {
+        BufferedReader reader = null;
+        try {
+        	Request newRequest = new Request("Platinum%20Baby%20Roshan", "DOTA2");
+            URL url = new URL(newRequest.getUrl());
+>>>>>>> 781db7425a292b308780bfdc2578d3fc9a5de8c8
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             StringBuffer buffer = new StringBuffer();
             int read;
