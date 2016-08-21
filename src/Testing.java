@@ -30,6 +30,7 @@ public class Testing {
 			result+=splitedString[i];
 		}
 		System.out.print(result);
+		scan.close();
 		return result;		
 	}
     public static void main(final String[] args) throws IOException {
