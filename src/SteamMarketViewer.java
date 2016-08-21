@@ -1,23 +1,18 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Scanner; 
+import java.util.Scanner;
 
-public class Testing {
+import javax.swing.JFrame;
+import javax.swing.JPanel; 
 
-	enum Games {
-		DOTA2(570);
-		
-		private int value;
-		private Games(int value) {
-			this.value = value;
-		}
-		
-		public String getValue() {
-			return Integer.toString(value);
-		}
-	};
+public class SteamMarketViewer {
+	private static JFrame frame;
+	private static JPanel panel;
+	
 	public static String convertIntoURLName(){
 		System.out.println("Please enter the item name:");		
 		Scanner scan = new Scanner(System.in);
@@ -28,16 +23,36 @@ public class Testing {
 			result+="%20";
 			result+=splitedString[i];
 		}
-		System.out.print(result);
+		scan.close();
 		return result;		
 	}
     public static void main(final String[] args) throws IOException {
+    	frame = new JFrame("Steam Market Viewer");
+    	Model model = new Model();
+    	Controller controller = new Controller(model);
+    	View view = new View(model, controller);
+    	Toolbar toolbar = new Toolbar(model, controller);
+    	
+    	model.addView(view);
+    	model.addToolbar(toolbar);
+    	
+		frame.setSize(new Dimension(800,600));
+		frame.setMinimumSize(new Dimension(320, 400));
+		frame.setResizable(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//frame.addComponentListener(controller);
+		
+		panel = new JPanel(new BorderLayout());
+		panel.add(toolbar);
+		frame.add(panel);
+		frame.setVisible(true);
+    	
+    	/*
         BufferedReader reader = null;
         try {
         	String setName=convertIntoURLName();
-        	String game = Games.DOTA2.getValue();
-            String name="http://steamcommunity.com/market/priceoverview/?appid="+game+"&market_hash_name="+ setName;
-            URL url = new URL(name);
+        	Request newRequest = new Request(setName, "DOTA2");
+            URL url = new URL(newRequest.getUrl());
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             StringBuffer buffer = new StringBuffer();
             int read;
@@ -49,6 +64,6 @@ public class Testing {
         } finally {
             if (reader != null)
                 reader.close();
-        }
+        }*/
     }
 }
