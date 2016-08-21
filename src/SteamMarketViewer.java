@@ -42,8 +42,9 @@ public class SteamMarketViewer {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.addComponentListener(controller);
 		
-		panel = new JPanel(new BorderLayout());
-		panel.add(toolbar);
+		panel = new JPanel(new BorderLayout());                        
+		panel.add(toolbar,BorderLayout.NORTH);
+		panel.add(view);                                                           
 		frame.add(panel);
 		frame.setVisible(true);
     	
