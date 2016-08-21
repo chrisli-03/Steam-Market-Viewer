@@ -17,11 +17,20 @@ public class Testing {
 			return Integer.toString(value);
 		}
 	};
-	
+	public static String convertIntoURLName(String input){
+		String [] splitedString=input.split(" ");
+		String result= splitedString[0];
+		for(int i =1;i<splitedString.length;i++){
+			result+="%20";
+			result+=splitedString[i];
+		}
+		System.out.print(result);
+		return result;		
+	}
     public static void main(final String[] args) throws IOException {
         BufferedReader reader = null;
         try {
-        	String setName="Platinum%20Baby%20Roshan";
+        	String setName=convertIntoURLName("Platinum Baby Roshan");
         	String game = Games.DOTA2.getValue();
             String name="http://steamcommunity.com/market/priceoverview/?appid="+game+"&market_hash_name="+ setName;
             URL url = new URL(name);
