@@ -1,12 +1,12 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
 public class Testing {
 	enum Games {
-		DOTA2(570);
+		DOTA2(570),
+		CSGO(730);
 		
 		private int value;
 		private Games(int value) {
