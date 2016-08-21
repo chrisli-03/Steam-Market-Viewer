@@ -5,20 +5,6 @@ import java.net.URL;
 import java.util.Scanner; 
 
 public class Testing {
-
-
-	enum Games {
-		DOTA2(570);
-		
-		private int value;
-		private Games(int value) {
-			this.value = value;
-		}
-		
-		public String getValue() {
-			return Integer.toString(value);
-		}
-	};
 	public static String convertIntoURLName(){
 		System.out.println("Please enter the item name:");		
 		Scanner scan = new Scanner(System.in);
@@ -29,7 +15,6 @@ public class Testing {
 			result+="%20";
 			result+=splitedString[i];
 		}
-		System.out.print(result);
 		scan.close();
 		return result;		
 	}
