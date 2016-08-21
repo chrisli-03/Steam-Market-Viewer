@@ -13,6 +13,7 @@ public class Toolbar extends JPanel implements IView {
 		this.model = model;
 		this.controller = controller;
 		this.setLayout(new FlowLayout());
+		filesButton = new JButton("files button");
 		filesButton.addActionListener(controller);
 		add(filesButton);
 	}

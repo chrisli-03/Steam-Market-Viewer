@@ -12,6 +12,8 @@ public class View extends JPanel implements IView {
 	View (Model model, Controller controller) {
 		this.model = model;
 		this.controller = controller;
+		addButton = new JButton("add button");
+		searchButton = new JButton("search button");
 		addButton.addActionListener(controller);
 		searchButton.addActionListener(controller);
 		initView();
