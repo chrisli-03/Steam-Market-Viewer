@@ -24,7 +24,8 @@ public class Testing {
         	// testing merge
         	String setName="Platinum%20Baby%20Roshan";
         	String game = Games.DOTA2.getValue();
-            String name="http://steamcommunity.com/market/priceoverview/?appid="+game+"&market_hash_name="+ setName;
+        	String te="dstsf";
+            String name="hasdfasdfat_hash_name="+ setName+te;
             URL url = new URL(name);
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             StringBuffer buffer = new StringBuffer();
