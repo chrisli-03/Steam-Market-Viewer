@@ -16,7 +16,6 @@ class Controller implements ActionListener {
 				String itemName = model.getItemNameFromView();
 				String gameName = model.getGameNameFromView();
 				model.addRequest(itemName, gameName);
-				System.out.println(itemName + " " + gameName);
 		}
 	}
 

@@ -1,5 +1,7 @@
+import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Scanner;
+
+import javax.swing.JOptionPane;
 
 public class Model {
 	private View view;
@@ -19,10 +21,15 @@ public class Model {
 	}
 
 	public void addRequest(String itemName, String gameName) { 
-		/*Todo: add duplicate check*/
-		Request newRequest = new Request(itemName, gameName);
-		requestList.add(newRequest);
-		view.updateView();
+		/*TODO: add duplicate check*/
+		try {
+			Request newRequest = new Request(itemName, gameName);
+			if (newRequest.getGameId().equals("")) return;
+			requestList.add(newRequest);
+			view.updateView();
+		} catch (IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null,"Unknown game");
+		}
 	}
 	
 	public String getItemNameFromView() {
