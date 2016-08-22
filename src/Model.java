@@ -5,15 +5,10 @@ import javax.swing.JOptionPane;
 
 public class Model {
 	private View view;
-	Toolbar toolbar;
 	private ArrayList<Request> requestList = new ArrayList<Request>();
 	
 	public void addView (View view) {
 		this.view = view;
-	}
-	
-	public void addToolbar(Toolbar tb) {
-		this.toolbar = tb;
 	}
 
 	public ArrayList<Request> getRequestList() {
