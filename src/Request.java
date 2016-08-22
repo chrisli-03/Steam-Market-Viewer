@@ -1,16 +1,18 @@
-import javax.swing.JOptionPane;
-
 public class Request {
 	String itemName = "";
-	String gameId = "";
+	String gameName = "";
 	
 	public Request(String itemName, String gameName) {
 		this.itemName = itemName;
-		this.gameId = Games.valueOf(gameName.toUpperCase()).getValue();
+		this.gameName = gameName.toUpperCase();
 	}
 	
 	public String getUrl() {
-		return "http://steamcommunity.com/market/priceoverview/?appid="+gameId+"&market_hash_name="+convertIntoURLName(itemName);
+		String gameId = Games.valueOf(gameName).getValue();
+		return "http://steamcommunity.com/market/priceoverview/?appid="
+				+gameId
+				+"&market_hash_name="
+				+convertIntoURLName(itemName);
 	}
 	
 	public String getItemName() {
@@ -18,7 +20,11 @@ public class Request {
 	}
 	
 	public String getGameId() {
-		return gameId;
+		return Games.valueOf(gameName).getValue();
+	}
+	
+	public String getGameName() {
+		return gameName;
 	}
 	
 	public String convertIntoURLName(String itemName){

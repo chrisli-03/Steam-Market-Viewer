@@ -1,11 +1,21 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 public class View extends JPanel implements IView {
 	private Model model;
@@ -17,10 +27,13 @@ public class View extends JPanel implements IView {
 	private JPanel rightPanel;
 	private JTextField itemName;
 	private JTextField gameName;
-	private JTextArea choosedItems;
+	private JTable choosedItems;
 	private JTextArea resultBox;
 	private JScrollPane gameNameScroll;
 	private JScrollPane resultBoxScroll;
+	private Object[][] tableData={};
+	private String[] ColumnName = { "Item", "Game", "Delete" };
+	private DefaultTableModel tableModel;
 
 	View(Model model, Controller controller) {
 		this.model = model;
@@ -30,11 +43,20 @@ public class View extends JPanel implements IView {
 		searchButton = new JButton("search");
 		itemName = new JTextField();
 		gameName = new JTextField();
-		choosedItems = new JTextArea();
+		choosedItems = new JTable(tableData, ColumnName);
 		resultBox = new JTextArea();
 		gameNameScroll= new JScrollPane(choosedItems);
 		resultBoxScroll= new JScrollPane(resultBox);
-		
+		tableModel = new DefaultTableModel() {
+							public boolean isCellEditable(int rowIndex, int mColIndex) {
+								if (mColIndex != 2) return false;
+								else return true;
+							}
+						};
+		choosedItems.setFocusable(false);
+		choosedItems.getTableHeader().setReorderingAllowed(false);
+		choosedItems.setModel(tableModel);
+		tableModel.setColumnIdentifiers(ColumnName);
 		addButton.addActionListener(controller);
 		searchButton.addActionListener(controller);
 		
@@ -49,10 +71,18 @@ public class View extends JPanel implements IView {
 		centerPanel.setLayout(new GridLayout(1, 2, 1, 1));
 		rightPanel = new JPanel();
 		rightPanel.setLayout(new GridLayout());
-		choosedItems.setEditable(false);
 		resultBox.setEditable(false);
 		addButton.setName("add button");
+		addButton.setFocusPainted(false);
 		searchButton.setName("search button");
+		choosedItems.setRowSelectionAllowed(false);
+	    TableColumn column = null;
+	    for (int i = 0; i < 3; i++) {
+	        column = choosedItems.getColumnModel().getColumn(i);
+	        if (i == 2) {
+	            column.setMaxWidth(50);
+	        }
+	    }  
 		
 		leftPanel = new JPanel();
 		leftPanel.setLayout(new GridBagLayout());
@@ -65,7 +95,7 @@ public class View extends JPanel implements IView {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		leftPanel.add(itemLabel, gbc);
 		
-		// Item name textbox (0, 1)
+		// Item name text box (0, 1)
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
@@ -78,7 +108,7 @@ public class View extends JPanel implements IView {
 		gbc.weightx = 0;
 		leftPanel.add(gameLabel, gbc);
 		
-		// Game name textbox (1, 1)
+		// Game name text box (1, 1)
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.weightx = 1.0;
@@ -127,11 +157,26 @@ public class View extends JPanel implements IView {
 
 	@Override
 	public void updateView() {
-		choosedItems.setText(null);
 		ArrayList<Request> requestList = model.getRequestList();
-		for (Request r : requestList) {
-			choosedItems.append(r.getItemName()+"\n");
+		tableModel.setColumnCount(3);
+		tableModel.setRowCount(0);
+		for (int i = 0; i < requestList.size(); i++) {
+			Object[] temp = new Object[] {requestList.get(i).getItemName(),
+					requestList.get(i).getGameName(),
+					"x"};
+			tableModel.addRow(temp);
 		}
+		tableModel.fireTableDataChanged();
+		TableColumn column = null;
+		for (int i = 0; i < 3; i++) {
+	        column = choosedItems.getColumnModel().getColumn(i);
+	        if (i == 2) {
+	            column.setMaxWidth(50);
+	        }
+	    }
+		choosedItems.getColumn("Delete").setCellRenderer(new ButtonRenderer());
+		choosedItems.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox()));
+		revalidate();
 		repaint();
 	}
 	
