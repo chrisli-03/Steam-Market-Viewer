@@ -13,19 +13,6 @@ public class SteamMarketViewer {
 	private static JFrame frame;
 	private static JPanel panel;
 	
-	public static String convertIntoURLName(){
-		System.out.println("Please enter the item name:");		
-		Scanner scan = new Scanner(System.in);
-		String input = scan.nextLine();
-		String [] splitedString=input.split(" ");
-		String result= splitedString[0];
-		for(int i =1;i<splitedString.length;i++){
-			result+="%20";
-			result+=splitedString[i];
-		}
-		scan.close();
-		return result;		
-	}
     public static void main(final String[] args) throws IOException {
     	frame = new JFrame("Steam Market Viewer");
     	Model model = new Model();
