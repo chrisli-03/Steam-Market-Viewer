@@ -1,11 +1,8 @@
-/Testing$Games.class
-/Testing.class
-/Games.class
-/Request.class
-/View.class
-/model.class
-/Model.class
 /Controller.class
-/SteamMarketViewer.class
+/Games.class
 /IView.class
+/Model.class
+/Request.class
+/SteamMarketViewer.class
 /Toolbar.class
+/View.class

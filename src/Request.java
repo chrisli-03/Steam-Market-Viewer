@@ -1,4 +1,4 @@
-import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 public class Request {
 	String itemName = "";
@@ -6,7 +6,7 @@ public class Request {
 	
 	public Request(String itemName, String gameName) {
 		this.itemName = itemName;
-		this.gameId = Games.valueOf(gameName).getValue();
+		this.gameId = Games.valueOf(gameName.toUpperCase()).getValue();
 	}
 	
 	public String getUrl() {
