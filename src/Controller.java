@@ -1,15 +1,40 @@
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+
 class Controller implements ActionListener {
 	private Model model;
+
 	public Controller(Model model) {
 		this.model = model;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-	}
+		Component frame = null;
+		if (e.getSource() instanceof JButton) {
+			Object source = e.getSource();
+			JButton button = (JButton) source;
+			if (button.getText() == "add button") {
+				String item = model.getItemName();
+				String game = model.getGameName();
+				if (item != null && game != null) {
+					System.out.println("add");
+					model.addSteamItem(item, game);
+				} else if(item == null ){
+					JOptionPane.showMessageDialog(frame, "Please enter the correct item name.");
+					
+				}else if(game == null ){
+					JOptionPane.showMessageDialog(frame, "Please enter the correct game name.");
+					
+				}else{
+					JOptionPane.showMessageDialog(frame, "Error.");
+				}
+			}
+		}
 
+	}
 }
