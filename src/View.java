@@ -5,7 +5,15 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 
 public class View extends JPanel implements IView {
 	private Model model;
@@ -17,10 +25,14 @@ public class View extends JPanel implements IView {
 	private JPanel rightPanel;
 	private JTextField itemName;
 	private JTextField gameName;
-	private JTextArea choosedItems;
-	private JTextArea resultBox;
+	private JTable choosedItems;
+	private JTable resultBox;
 	private JScrollPane gameNameScroll;
 	private JScrollPane resultBoxScroll;
+	private Object[][] tableData={};
+	private Object[][] searchResultData={};
+	private DefaultTableModel tableModel;
+	private DefaultTableModel resultTableModel;
 
 	View(Model model, Controller controller) {
 		this.model = model;
@@ -30,10 +42,32 @@ public class View extends JPanel implements IView {
 		searchButton = new JButton("search");
 		itemName = new JTextField();
 		gameName = new JTextField();
-		choosedItems = new JTextArea();
-		resultBox = new JTextArea();
+		String[] searchColumn = { "Item", "Game", "Delete" };
+		choosedItems = new JTable(tableData, searchColumn);
+		String[] resultColumn = { "Item", "Price", "Vol", "Median", "Date"};
+		resultBox = new JTable(searchResultData, resultColumn);
 		gameNameScroll= new JScrollPane(choosedItems);
 		resultBoxScroll= new JScrollPane(resultBox);
+		tableModel = new DefaultTableModel() {
+							public boolean isCellEditable(int rowIndex, int mColIndex) {
+								if (mColIndex != 2) return false;
+								else return true;
+							}
+						};
+		resultTableModel = new DefaultTableModel() {
+			public boolean isCellEditable(int rowIndex, int mColIndex) {
+				return false;
+			}
+		};
+		choosedItems.setFocusable(false);
+		choosedItems.getTableHeader().setReorderingAllowed(false);
+		tableModel.setColumnIdentifiers(searchColumn);
+		choosedItems.setModel(tableModel);
+		
+		resultBox.setFocusable(false);
+		resultBox.getTableHeader().setReorderingAllowed(false);
+		resultTableModel.setColumnIdentifiers(resultColumn);
+		resultBox.setModel(resultTableModel);
 		
 		addButton.addActionListener(controller);
 		searchButton.addActionListener(controller);
@@ -49,10 +83,30 @@ public class View extends JPanel implements IView {
 		centerPanel.setLayout(new GridLayout(1, 2, 1, 1));
 		rightPanel = new JPanel();
 		rightPanel.setLayout(new GridLayout());
-		choosedItems.setEditable(false);
-		resultBox.setEditable(false);
+		resultBox.setRowSelectionAllowed(false);
 		addButton.setName("add button");
+		addButton.setFocusPainted(false);
 		searchButton.setName("search button");
+		choosedItems.setRowSelectionAllowed(false);
+		resultBox.setRowSelectionAllowed(false);
+	    TableColumn column = null;
+	    for (int i = 0; i < 3; i++) {
+	        column = choosedItems.getColumnModel().getColumn(i);
+	        if (i == 2) {
+	            column.setMaxWidth(50);
+	        }
+	    }
+	    
+	    for (int i = 0; i < 5; i++) {
+	        column = resultBox.getColumnModel().getColumn(i);
+	        if ((i == 1)||(i == 3)) {
+	        	column.setMaxWidth(50);
+	        } else if (i == 2) {
+	        	column.setMaxWidth(40);
+	        } else if (i == 4) {
+	        	column.setMaxWidth(75);
+	        }
+	    }
 		
 		leftPanel = new JPanel();
 		leftPanel.setLayout(new GridBagLayout());
@@ -65,7 +119,7 @@ public class View extends JPanel implements IView {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		leftPanel.add(itemLabel, gbc);
 		
-		// Item name textbox (0, 1)
+		// Item name text box (0, 1)
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
@@ -78,7 +132,7 @@ public class View extends JPanel implements IView {
 		gbc.weightx = 0;
 		leftPanel.add(gameLabel, gbc);
 		
-		// Game name textbox (1, 1)
+		// Game name text box (1, 1)
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.weightx = 1.0;
@@ -127,11 +181,26 @@ public class View extends JPanel implements IView {
 
 	@Override
 	public void updateView() {
-		choosedItems.setText(null);
 		ArrayList<Request> requestList = model.getRequestList();
-		for (Request r : requestList) {
-			choosedItems.append(r.getItemName()+"\n");
+		tableModel.setColumnCount(3);
+		tableModel.setRowCount(0);
+		for (int i = 0; i < requestList.size(); i++) {
+			Object[] temp = new Object[] {requestList.get(i).getItemName(),
+					requestList.get(i).getGameName(),
+					"x"};
+			tableModel.addRow(temp);
 		}
+		tableModel.fireTableDataChanged();
+		TableColumn column = null;
+		for (int i = 0; i < 3; i++) {
+	        column = choosedItems.getColumnModel().getColumn(i);
+	        if (i == 2) {
+	            column.setMaxWidth(50);
+	        }
+	    }
+		choosedItems.getColumn("Delete").setCellRenderer(new ButtonRenderer());
+		choosedItems.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox(), model));
+		revalidate();
 		repaint();
 	}
 	
@@ -141,5 +210,34 @@ public class View extends JPanel implements IView {
 	
 	public String getGameName() {
 		return gameName.getText();
+	}
+	
+	public void updateResultView() {
+		ArrayList<Result> resultList = model.getResultList();
+		resultTableModel.setColumnCount(5);
+		resultTableModel.setRowCount(0);
+		for (Result res : resultList) {
+			Object[] temp = new Object[] { res.getItemName(),
+											res.getPrice(),
+											res.getVolumn(),
+											res.getMedian(),
+											res.getDate() };
+			resultTableModel.addRow(temp);
+		}
+		
+		resultTableModel.fireTableDataChanged();
+		TableColumn column = null;
+		for (int i = 0; i < 5; i++) {
+	        column = resultBox.getColumnModel().getColumn(i);
+	        if ((i == 1)||(i == 3)) {
+	        	column.setMaxWidth(50);
+	        } else if (i == 2) {
+	        	column.setMaxWidth(40);
+	        } else if (i == 4) {
+	        	column.setMaxWidth(75);
+	        }
+	    }
+		revalidate();
+		repaint();
 	}
 }
