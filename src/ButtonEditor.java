@@ -2,22 +2,21 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 
 class ButtonEditor extends DefaultCellEditor {
 	protected JButton button;
 	private String label;
 	private boolean isPushed;
+	private int row;
+	private Model model;
 
-	public ButtonEditor(JCheckBox checkBox) {
+	public ButtonEditor(JCheckBox checkBox, Model model) {
 		super(checkBox);
+		this.model = model;
 		button = new JButton();
 		button.setOpaque(true);
 		button.addActionListener(new ActionListener() {
@@ -29,6 +28,7 @@ class ButtonEditor extends DefaultCellEditor {
 
 	public Component getTableCellEditorComponent(JTable table, Object value,
 			boolean isSelected, int row, int column) {
+		this.row = row;
 		if (isSelected) {
 			button.setForeground(table.getSelectionForeground());
 			button.setBackground(table.getSelectionBackground());
@@ -43,10 +43,11 @@ class ButtonEditor extends DefaultCellEditor {
 		isPushed = true;
 		return button;
 	}
-
-	public Object getCellEditorValue() {
+	
+	// causes ArrayIndexOutOfBoundsException for some reason
+	public Object getCellEditorValue() throws ArrayIndexOutOfBoundsException {
 		if (isPushed) {
-			JOptionPane.showMessageDialog(button, "TODO: Implement Delete");
+			model.deleteRequestAtN(row);
 		}
 		isPushed = false;
 		return new String(label);

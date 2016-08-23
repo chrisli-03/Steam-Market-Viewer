@@ -2,6 +2,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
 
@@ -18,6 +19,16 @@ class Controller implements ActionListener, ComponentListener {
 				String itemName = model.getItemNameFromView();
 				String gameName = model.getGameNameFromView();
 				model.addRequest(itemName, gameName);
+				break;
+			case "search button":
+				try {
+					model.generatePrice();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				break;
+			default:
 		}
 	}
 
