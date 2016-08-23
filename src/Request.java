@@ -1,16 +1,18 @@
-import java.util.Scanner;
-
 public class Request {
-	String itemName = "";
-	String gameId = "";
+	private String itemName = "";
+	private String gameName = "";
 	
 	public Request(String itemName, String gameName) {
 		this.itemName = itemName;
-		this.gameId = Games.valueOf(gameName).getValue();
+		this.gameName = gameName.toUpperCase();
 	}
 	
 	public String getUrl() {
-		return "http://steamcommunity.com/market/priceoverview/?appid="+gameId+"&market_hash_name="+convertIntoURLName(itemName);
+		String gameId = Games.valueOf(gameName).getValue();
+		return "http://steamcommunity.com/market/priceoverview/?appid="
+				+gameId
+				+"&market_hash_name="
+				+convertIntoURLName(itemName);
 	}
 	
 	public String getItemName() {
@@ -18,13 +20,17 @@ public class Request {
 	}
 	
 	public String getGameId() {
-		return gameId;
+		return Games.valueOf(gameName).getValue();
+	}
+	
+	public String getGameName() {
+		return gameName;
 	}
 	
 	public String convertIntoURLName(String itemName){
 		String [] splitedString=itemName.split(" ");
 		String result= splitedString[0];
-		for(int i =1;i<splitedString.length;i++){
+		for(int i = 1;i<splitedString.length; i++){
 			result+="%20";
 			result+=splitedString[i];
 		}

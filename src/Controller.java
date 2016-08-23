@@ -1,40 +1,59 @@
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 
-class Controller implements ActionListener {
+class Controller implements ActionListener, ComponentListener {
 	private Model model;
-
 	public Controller(Model model) {
 		this.model = model;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Component frame = null;
-		if (e.getSource() instanceof JButton) {
-			Object source = e.getSource();
-			JButton button = (JButton) source;
-			if (button.getText() == "add button") {
-				String item = model.getItemName();
-				String game = model.getGameName();
-				if (item != null && game != null) {
-					System.out.println("add");
-					model.addSteamItem(item, game);
-				} else if(item == null ){
-					JOptionPane.showMessageDialog(frame, "Please enter the correct item name.");
-					
-				}else if(game == null ){
-					JOptionPane.showMessageDialog(frame, "Please enter the correct game name.");
-					
-				}else{
-					JOptionPane.showMessageDialog(frame, "Error.");
+		switch (((JButton)e.getSource()).getName()) {
+			case "add button":
+				String itemName = model.getItemNameFromView();
+				String gameName = model.getGameNameFromView();
+				model.addRequest(itemName, gameName);
+				break;
+			case "search button":
+				try {
+					model.generatePrice();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-			}
+				break;
+			default:
 		}
-
 	}
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
