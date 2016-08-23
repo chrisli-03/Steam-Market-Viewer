@@ -1,6 +1,5 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -12,7 +11,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -28,12 +26,13 @@ public class View extends JPanel implements IView {
 	private JTextField itemName;
 	private JTextField gameName;
 	private JTable choosedItems;
-	private JTextArea resultBox;
+	private JTable resultBox;
 	private JScrollPane gameNameScroll;
 	private JScrollPane resultBoxScroll;
 	private Object[][] tableData={};
-	private String[] ColumnName = { "Item", "Game", "Delete" };
+	private Object[][] searchResultData={};
 	private DefaultTableModel tableModel;
+	private DefaultTableModel resultTableModel;
 
 	View(Model model, Controller controller) {
 		this.model = model;
@@ -43,8 +42,10 @@ public class View extends JPanel implements IView {
 		searchButton = new JButton("search");
 		itemName = new JTextField();
 		gameName = new JTextField();
-		choosedItems = new JTable(tableData, ColumnName);
-		resultBox = new JTextArea();
+		String[] searchColumn = { "Item", "Game", "Delete" };
+		choosedItems = new JTable(tableData, searchColumn);
+		String[] resultColumn = { "Item", "Price", "Vol", "Median", "Date"};
+		resultBox = new JTable(searchResultData, resultColumn);
 		gameNameScroll= new JScrollPane(choosedItems);
 		resultBoxScroll= new JScrollPane(resultBox);
 		tableModel = new DefaultTableModel() {
@@ -53,10 +54,21 @@ public class View extends JPanel implements IView {
 								else return true;
 							}
 						};
+		resultTableModel = new DefaultTableModel() {
+			public boolean isCellEditable(int rowIndex, int mColIndex) {
+				return false;
+			}
+		};
 		choosedItems.setFocusable(false);
 		choosedItems.getTableHeader().setReorderingAllowed(false);
+		tableModel.setColumnIdentifiers(searchColumn);
 		choosedItems.setModel(tableModel);
-		tableModel.setColumnIdentifiers(ColumnName);
+		
+		resultBox.setFocusable(false);
+		resultBox.getTableHeader().setReorderingAllowed(false);
+		resultTableModel.setColumnIdentifiers(resultColumn);
+		resultBox.setModel(resultTableModel);
+		
 		addButton.addActionListener(controller);
 		searchButton.addActionListener(controller);
 		
@@ -71,18 +83,30 @@ public class View extends JPanel implements IView {
 		centerPanel.setLayout(new GridLayout(1, 2, 1, 1));
 		rightPanel = new JPanel();
 		rightPanel.setLayout(new GridLayout());
-		resultBox.setEditable(false);
+		resultBox.setRowSelectionAllowed(false);
 		addButton.setName("add button");
 		addButton.setFocusPainted(false);
 		searchButton.setName("search button");
 		choosedItems.setRowSelectionAllowed(false);
+		resultBox.setRowSelectionAllowed(false);
 	    TableColumn column = null;
 	    for (int i = 0; i < 3; i++) {
 	        column = choosedItems.getColumnModel().getColumn(i);
 	        if (i == 2) {
 	            column.setMaxWidth(50);
 	        }
-	    }  
+	    }
+	    
+	    for (int i = 0; i < 5; i++) {
+	        column = resultBox.getColumnModel().getColumn(i);
+	        if ((i == 1)||(i == 3)) {
+	        	column.setMaxWidth(50);
+	        } else if (i == 2) {
+	        	column.setMaxWidth(40);
+	        } else if (i == 4) {
+	        	column.setMaxWidth(75);
+	        }
+	    }
 		
 		leftPanel = new JPanel();
 		leftPanel.setLayout(new GridBagLayout());
@@ -175,7 +199,7 @@ public class View extends JPanel implements IView {
 	        }
 	    }
 		choosedItems.getColumn("Delete").setCellRenderer(new ButtonRenderer());
-		choosedItems.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox()));
+		choosedItems.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox(), model));
 		revalidate();
 		repaint();
 	}
@@ -186,5 +210,34 @@ public class View extends JPanel implements IView {
 	
 	public String getGameName() {
 		return gameName.getText();
+	}
+	
+	public void updateResultView() {
+		ArrayList<Result> resultList = model.getResultList();
+		resultTableModel.setColumnCount(5);
+		resultTableModel.setRowCount(0);
+		for (Result res : resultList) {
+			Object[] temp = new Object[] { res.getItemName(),
+											res.getPrice(),
+											res.getVolumn(),
+											res.getMedian(),
+											res.getDate() };
+			resultTableModel.addRow(temp);
+		}
+		
+		resultTableModel.fireTableDataChanged();
+		TableColumn column = null;
+		for (int i = 0; i < 5; i++) {
+	        column = resultBox.getColumnModel().getColumn(i);
+	        if ((i == 1)||(i == 3)) {
+	        	column.setMaxWidth(50);
+	        } else if (i == 2) {
+	        	column.setMaxWidth(40);
+	        } else if (i == 4) {
+	        	column.setMaxWidth(75);
+	        }
+	    }
+		revalidate();
+		repaint();
 	}
 }

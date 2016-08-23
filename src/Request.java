@@ -1,6 +1,6 @@
 public class Request {
-	String itemName = "";
-	String gameName = "";
+	private String itemName = "";
+	private String gameName = "";
 	
 	public Request(String itemName, String gameName) {
 		this.itemName = itemName;
@@ -30,7 +30,7 @@ public class Request {
 	public String convertIntoURLName(String itemName){
 		String [] splitedString=itemName.split(" ");
 		String result= splitedString[0];
-		for(int i =1;i<splitedString.length;i++){
+		for(int i = 1;i<splitedString.length; i++){
 			result+="%20";
 			result+=splitedString[i];
 		}
