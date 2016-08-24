@@ -54,9 +54,9 @@ public class Model {
 	
 	public void generatePrice() throws IOException {
 		BufferedReader reader = null;
-		Result res = new Result();
       	resultList = new ArrayList<Result>();
 		for (Request req : requestList) {
+			Result res = new Result();
 			try {
 		      	String webUrl = req.getUrl();
 		      	URL url = new URL(webUrl);
