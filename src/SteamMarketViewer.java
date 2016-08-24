@@ -17,18 +17,22 @@ public class SteamMarketViewer {
     	
     	model.addView(view);
     	
-		frame.setSize(new Dimension(800,600));
-		frame.setMinimumSize(new Dimension(320, 400));
-		frame.setResizable(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.addComponentListener(controller);
-		
-		panel = new JPanel(new BorderLayout());                                                          
-		
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.addTab("Main", view);
-		tabbedPane.addTab("Setting", panel);
-		frame.add(tabbedPane);
-		frame.setVisible(true);
+    	javax.swing.SwingUtilities.invokeLater(new Runnable() {
+    		public void run() {
+    			frame.setSize(new Dimension(800,600));
+    			frame.setMinimumSize(new Dimension(320, 400));
+    			frame.setResizable(true);
+    			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    			frame.addComponentListener(controller);
+    			
+    			panel = new JPanel(new BorderLayout());                                                          
+    			
+    			JTabbedPane tabbedPane = new JTabbedPane();
+    			tabbedPane.addTab("Main", view);
+    			tabbedPane.addTab("Setting", panel);
+    			frame.add(tabbedPane);
+    			frame.setVisible(true);
+    		}
+    	});
     }
 }

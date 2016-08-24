@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -14,6 +15,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.AutoCompleteSupport;
 
 public class View extends JPanel implements IView {
 	private Model model;
@@ -23,8 +27,6 @@ public class View extends JPanel implements IView {
 	private JPanel leftPanel;
 	private JPanel centerPanel;
 	private JPanel rightPanel;
-	private JTextField itemName;
-	private JTextField gameName;
 	private JTable choosedItems;
 	private JTable resultBox;
 	private JScrollPane gameNameScroll;
@@ -33,6 +35,17 @@ public class View extends JPanel implements IView {
 	private Object[][] searchResultData={};
 	private DefaultTableModel tableModel;
 	private DefaultTableModel resultTableModel;
+	Object[] exampleItems = new Object[] {"Platinum Baby Roshan", 
+										"Platinum Baby Roshan 2", 
+										"Platinum Baby Roshan 3", 
+										"Test", 
+										"Test 2", 
+										"test"};
+	Object[] exampleGames = new Object[] {"Dota2", 
+										"CSGO"};
+	
+	private JComboBox itemBox;
+	private JComboBox gameBox;
 
 	View(Model model, Controller controller) {
 		this.model = model;
@@ -40,8 +53,16 @@ public class View extends JPanel implements IView {
 		
 		addButton = new JButton("+");
 		searchButton = new JButton("search");
-		itemName = new JTextField();
-		gameName = new JTextField();
+		
+		itemBox = new JComboBox();
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				AutoCompleteSupport.install(itemBox, GlazedLists.eventListOf(exampleItems));
+				AutoCompleteSupport.install(gameBox, GlazedLists.eventListOf(exampleGames));
+			}
+		});
+		
+		gameBox = new JComboBox();
 		String[] searchColumn = { "Item", "Game", "Delete" };
 		choosedItems = new JTable(tableData, searchColumn);
 		String[] resultColumn = { "Item", "Price", "Vol", "Median", "Date"};
@@ -123,7 +144,7 @@ public class View extends JPanel implements IView {
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.weightx = 1.0;
-		leftPanel.add(itemName, gbc);
+		leftPanel.add(itemBox, gbc);
 		
 		// Enter game label (1, 0)
 		JLabel gameLabel = new JLabel("Enter Game: ");
@@ -136,7 +157,7 @@ public class View extends JPanel implements IView {
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gbc.weightx = 1.0;
-		leftPanel.add(gameName, gbc);
+		leftPanel.add(gameBox, gbc);
 		
 		// Add button (2, 0)
 		gbc.gridx = 2;
@@ -205,11 +226,11 @@ public class View extends JPanel implements IView {
 	}
 	
 	public String getItemName() {
-		return itemName.getText();
+		return (String) itemBox.getSelectedItem();
 	}
 	
 	public String getGameName() {
-		return gameName.getText();
+		return (String) gameBox.getSelectedItem();
 	}
 	
 	public void updateResultView() {
