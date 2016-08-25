@@ -1,7 +1,7 @@
 # Steam-Market-Viewer
 A program for viewing steam market items
 
-TODO: -implement MVC(done)
+TODO: -~~implement MVC~~
       -create dropdown list for inputs(done)
       -connect to a database
       -create setting page
