@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -14,7 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -25,19 +25,28 @@ import ca.odell.glazedlists.swing.AutoCompleteSupport;
 public class View extends JPanel implements IView {
 	private Model model;
 	private Controller controller;
+	
 	private JButton addButton;
 	private JButton searchButton;
-	private JPanel leftPanel;
-	private JPanel centerPanel;
-	private JPanel rightPanel;
-	private JTable choosedItems;
-	private JTable resultBox;
+	
+	
+	private JTable searchTable;
+	private JTable resultTable;
+	
+	private JComboBox itemBox;
+	private JComboBox gameBox;
+	
+	private JProgressBar searchProgressBar;
+	
 	private JScrollPane gameNameScroll;
 	private JScrollPane resultBoxScroll;
-	private Object[][] tableData={};
-	private Object[][] searchResultData={};
-	private DefaultTableModel tableModel;
+	
+	private Object[][] searchTableData={};
+	private Object[][] resultTableData={};
+	private DefaultTableModel searchTableModel;
 	private DefaultTableModel resultTableModel;
+	
+	// TODO: retrieve game and item info from database
 	Object[] exampleItems = new Object[] {"Platinum Baby Roshan", 
 										"Platinum Baby Roshan 2", 
 										"Platinum Baby Roshan 3", 
@@ -47,18 +56,34 @@ public class View extends JPanel implements IView {
 	Object[] exampleGames = new Object[] {"Dota2", 
 										"CSGO"};
 	
-	private JComboBox itemBox;
-	private JComboBox gameBox;
-	private JProgressBar progressBar;
 
+	
 	View(Model model, Controller controller) {
+		// store model and controller
 		this.model = model;
 		this.controller = controller;
+		initView();
+	}
+
+	private void initView() {
+		// set layout and bgc
+		this.setBackground(Color.WHITE);
+		this.setLayout(new BorderLayout());
 		
+		// setup add and search buttons
 		addButton = new JButton("+");
-		searchButton = new JButton("search");
+		addButton.setName("add button");
+		addButton.setFocusPainted(false);
+		addButton.addActionListener(controller);
 		
+		searchButton = new JButton("search");
+		searchButton.setName("search button");
+		searchButton.setFocusPainted(false);
+		searchButton.addActionListener(controller);
+		
+		// setup item name and game name boxes
 		itemBox = new JComboBox();
+		gameBox = new JComboBox();
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				AutoCompleteSupport.install(itemBox, GlazedLists.eventListOf(exampleItems));
@@ -66,82 +91,51 @@ public class View extends JPanel implements IView {
 			}
 		});
 		
-		gameBox = new JComboBox();
+		// setup search table
 		String[] searchColumn = { "Item", "Game", "Delete" };
-		choosedItems = new JTable(tableData, searchColumn);
+		searchTable = new JTable(searchTableData, searchColumn);
+		searchTable.setFocusable(false);
+		searchTable.getTableHeader().setReorderingAllowed(false);
+		searchTableModel = new DefaultTableModel() {
+			public boolean isCellEditable(int rowIndex, int mColIndex) {
+				if (mColIndex != 2) return false;
+				else return true;
+			}
+		};
+		searchTableModel.setColumnIdentifiers(searchColumn);
+		searchTable.setModel(searchTableModel);
+		searchTable.setRowSelectionAllowed(false);
+		gameNameScroll= new JScrollPane(searchTable);
+		
+		// setup result table
 		String[] resultColumn = { "Item", "Price", "Vol", "Median", "Date"};
-		resultBox = new JTable(searchResultData, resultColumn);
-		gameNameScroll= new JScrollPane(choosedItems);
-		resultBoxScroll= new JScrollPane(resultBox);
-		tableModel = new DefaultTableModel() {
-							public boolean isCellEditable(int rowIndex, int mColIndex) {
-								if (mColIndex != 2) return false;
-								else return true;
-							}
-						};
+		resultTable = new JTable(resultTableData, resultColumn);
+		resultTable.setFocusable(false);
+		resultTable.getTableHeader().setReorderingAllowed(false);
 		resultTableModel = new DefaultTableModel() {
 			public boolean isCellEditable(int rowIndex, int mColIndex) {
 				return false;
 			}
 		};
-		choosedItems.setFocusable(false);
-		choosedItems.getTableHeader().setReorderingAllowed(false);
-		tableModel.setColumnIdentifiers(searchColumn);
-		choosedItems.setModel(tableModel);
-		
-		resultBox.setFocusable(false);
-		resultBox.getTableHeader().setReorderingAllowed(false);
 		resultTableModel.setColumnIdentifiers(resultColumn);
-		resultBox.setModel(resultTableModel);
+		resultTable.setModel(resultTableModel);
+		resultTable.setRowSelectionAllowed(false);
+		resultBoxScroll = new JScrollPane(resultTable);
 		
-		addButton.addActionListener(controller);
-		searchButton.addActionListener(controller);
+		// setup progress bar
+		searchProgressBar = new JProgressBar(0, 100);
+		searchProgressBar.setValue(0);
+		searchProgressBar.setStringPainted(true);
 		
-		progressBar = new JProgressBar(0, 100);
-		//progressBar.addPropertyChangeListener(controller);
-		progressBar.setValue(0);
-		progressBar.setStringPainted(true);
+		// setup table column width
+	    setupSearchTableColumnWidth();
+	    setupResultTableColumnWidth();
 		
-		initView();
-	}
-
-	private void initView() {
-		this.setBackground(Color.WHITE);
-		this.setLayout(new BorderLayout());
-		
-		centerPanel = new JPanel();
-		centerPanel.setLayout(new GridLayout(1, 2, 1, 1));
-		rightPanel = new JPanel();
-		rightPanel.setLayout(new GridLayout());
-		resultBox.setRowSelectionAllowed(false);
-		addButton.setName("add button");
-		addButton.setFocusPainted(false);
-		searchButton.setName("search button");
-		choosedItems.setRowSelectionAllowed(false);
-		resultBox.setRowSelectionAllowed(false);
-	    TableColumn column = null;
-	    for (int i = 0; i < 3; i++) {
-	        column = choosedItems.getColumnModel().getColumn(i);
-	        if (i == 2) {
-	            column.setMaxWidth(50);
-	        }
-	    }
-	    
-	    for (int i = 0; i < 5; i++) {
-	        column = resultBox.getColumnModel().getColumn(i);
-	        if ((i == 1)||(i == 3)) {
-	        	column.setMaxWidth(50);
-	        } else if (i == 2) {
-	        	column.setMaxWidth(40);
-	        } else if (i == 4) {
-	        	column.setMaxWidth(75);
-	        }
-	    }
-		
+	    // setup left panel
+	    JPanel leftPanel;
 		leftPanel = new JPanel();
 		leftPanel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-		
 		// Enter item label (0, 0)
 		JLabel itemLabel = new JLabel("Enter Item: ");
 		gbc.gridx = 0;
@@ -194,47 +188,53 @@ public class View extends JPanel implements IView {
 		leftPanel.add(gameNameScroll, gbc);
 		
 		// Search button and progress bar (0, 4)
-		JPanel searchAndProgressBar = new JPanel();
-		searchAndProgressBar.add(searchButton);
-		searchAndProgressBar.add(progressBar);
 		gbc.anchor = GridBagConstraints.LAST_LINE_END;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.gridx = 0;
 		gbc.gridy = 4;
+		JPanel searchAndProgressBar = new JPanel();
+		searchAndProgressBar.add(searchButton);
+		searchAndProgressBar.add(searchProgressBar);
 		leftPanel.add(searchAndProgressBar, gbc);
 		
+		// setup right panel
+		JPanel rightPanel;
+		rightPanel = new JPanel();
+		rightPanel.setLayout(new GridLayout());
 		rightPanel.add(resultBoxScroll);
 		
+		// connect left and right panel
+		JPanel centerPanel;
+		centerPanel = new JPanel();
+		centerPanel.setLayout(new GridLayout(1, 2, 1, 1));
 		centerPanel.add(leftPanel);
 		centerPanel.add(rightPanel);
-		
 		add(centerPanel, BorderLayout.CENTER);
 	}
-
-	@Override
-	public void updateView() {
-		ArrayList<Request> requestList = model.getRequestList();
-		tableModel.setColumnCount(3);
-		tableModel.setRowCount(0);
-		for (int i = 0; i < requestList.size(); i++) {
-			Object[] temp = new Object[] {requestList.get(i).getItemName(),
-					requestList.get(i).getGameName(),
-					"x"};
-			tableModel.addRow(temp);
-		}
-		tableModel.fireTableDataChanged();
+	
+	private void setupSearchTableColumnWidth() {
 		TableColumn column = null;
 		for (int i = 0; i < 3; i++) {
-	        column = choosedItems.getColumnModel().getColumn(i);
+	        column = searchTable.getColumnModel().getColumn(i);
 	        if (i == 2) {
 	            column.setMaxWidth(50);
 	        }
 	    }
-		choosedItems.getColumn("Delete").setCellRenderer(new ButtonRenderer());
-		choosedItems.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox(), model));
-		revalidate();
-		repaint();
+	}
+	
+	private void setupResultTableColumnWidth() {
+		TableColumn column = null;
+		for (int i = 0; i < 5; i++) {
+	        column = resultTable.getColumnModel().getColumn(i);
+	        if ((i == 1)||(i == 3)) {
+	        	column.setMaxWidth(50);
+	        } else if (i == 2) {
+	        	column.setMaxWidth(40);
+	        } else if (i == 4) {
+	        	column.setMaxWidth(75);
+	        }
+	    }
 	}
 	
 	public String getItemName() {
@@ -245,9 +245,34 @@ public class View extends JPanel implements IView {
 		return (String) gameBox.getSelectedItem();
 	}
 	
+	@Override
+	public void updateView() {
+		// clear search table
+		ArrayList<Request> requestList = model.getRequestList();
+		searchTableModel.setColumnCount(3);
+		searchTableModel.setRowCount(0);
+		
+		setupSearchTableColumnWidth();
+		
+		// go through search list and add to table
+		for (int i = 0; i < requestList.size(); i++) {
+			// create object and add to table
+			Object[] temp = new Object[] {requestList.get(i).getItemName(),
+					requestList.get(i).getGameName(),
+					"x"};
+			searchTableModel.addRow(temp);
+		}
+		searchTableModel.fireTableDataChanged();
+		
+		// add delete buttons
+		searchTable.getColumn("Delete").setCellRenderer(new ButtonRenderer());
+		searchTable.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox(), model));
+		revalidate();
+		repaint();
+	}
+	
 	public void updateResultView() {
 		Task task = new Task();
-		//task.addPropertyChangeListener(controller);
 		task.execute();
 		revalidate();
 		repaint();
@@ -259,40 +284,34 @@ public class View extends JPanel implements IView {
          */
         @Override
         public Void doInBackground() {
-            int progress = 0;
+        	// empty the table
         	ArrayList<Result> resultList = model.getResultList();
     		resultTableModel.setColumnCount(5);
     		resultTableModel.setRowCount(0);
+    		
+    		setupResultTableColumnWidth();
+    		
+    		// go through result list and update result table
+    		int progress = 0;
     		int increment = 100/resultList.size();
-    		System.out.println(increment);
     		for (Result res : resultList) {
     			try {
-    				Thread.sleep(500);
+    				Thread.sleep(500); // 500ms between adding result
     			} catch (InterruptedException ignore) {}
+    			// create object and add to table
     			Object[] temp = new Object[] { res.getItemName(),
     											res.getPrice(),
     											res.getVolumn(),
     											res.getMedian(),
     											res.getDate() };
     			resultTableModel.addRow(temp);
+    			// move progress bar
     			progress += increment;
-    			progressBar.setValue(Math.min(progress, 100));
+    			searchProgressBar.setValue(Math.min(progress, 100));
     		}
-    		progressBar.setValue(100);
-    		
+    		searchProgressBar.setValue(100); // completely fill progress bar
     		resultTableModel.fireTableDataChanged();
-    		TableColumn column = null;
-    		for (int i = 0; i < 5; i++) {
-    	        column = resultBox.getColumnModel().getColumn(i);
-    	        if ((i == 1)||(i == 3)) {
-    	        	column.setMaxWidth(50);
-    	        } else if (i == 2) {
-    	        	column.setMaxWidth(40);
-    	        } else if (i == 4) {
-    	        	column.setMaxWidth(75);
-    	        }
-    	    }
-            return null;
+    		return null;
         }
  
         /*
@@ -300,7 +319,7 @@ public class View extends JPanel implements IView {
          */
         @Override
         public void done() {
-            Toolkit.getDefaultToolkit().beep();
+            Toolkit.getDefaultToolkit().beep(); // not sure what this is
         }
     }
 }
