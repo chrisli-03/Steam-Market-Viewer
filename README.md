@@ -3,6 +3,7 @@ A program for viewing steam market items
 TODO:
 - ~~implement MVC~~
 - ~~create dropdown list for inputs~~
+- add real time for search result
 - connect to a database
 - create setting page
 - add a column in result table that shows game name
