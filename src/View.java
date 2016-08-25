@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -10,9 +11,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -46,6 +49,7 @@ public class View extends JPanel implements IView {
 	
 	private JComboBox itemBox;
 	private JComboBox gameBox;
+	private JProgressBar progressBar;
 
 	View(Model model, Controller controller) {
 		this.model = model;
@@ -92,6 +96,11 @@ public class View extends JPanel implements IView {
 		
 		addButton.addActionListener(controller);
 		searchButton.addActionListener(controller);
+		
+		progressBar = new JProgressBar(0, 100);
+		//progressBar.addPropertyChangeListener(controller);
+		progressBar.setValue(0);
+		progressBar.setStringPainted(true);
 		
 		initView();
 	}
@@ -184,13 +193,16 @@ public class View extends JPanel implements IView {
 		gbc.weighty = 1.0;
 		leftPanel.add(gameNameScroll, gbc);
 		
-		// Search button (0, 4)
+		// Search button and progress bar (0, 4)
+		JPanel searchAndProgressBar = new JPanel();
+		searchAndProgressBar.add(searchButton);
+		searchAndProgressBar.add(progressBar);
 		gbc.anchor = GridBagConstraints.LAST_LINE_END;
 		gbc.weightx = 0;
 		gbc.weighty = 0;
 		gbc.gridx = 0;
 		gbc.gridy = 4;
-		leftPanel.add(searchButton, gbc);
+		leftPanel.add(searchAndProgressBar, gbc);
 		
 		rightPanel.add(resultBoxScroll);
 		
@@ -234,31 +246,61 @@ public class View extends JPanel implements IView {
 	}
 	
 	public void updateResultView() {
-		ArrayList<Result> resultList = model.getResultList();
-		resultTableModel.setColumnCount(5);
-		resultTableModel.setRowCount(0);
-		for (Result res : resultList) {
-			Object[] temp = new Object[] { res.getItemName(),
-											res.getPrice(),
-											res.getVolumn(),
-											res.getMedian(),
-											res.getDate() };
-			resultTableModel.addRow(temp);
-		}
-		
-		resultTableModel.fireTableDataChanged();
-		TableColumn column = null;
-		for (int i = 0; i < 5; i++) {
-	        column = resultBox.getColumnModel().getColumn(i);
-	        if ((i == 1)||(i == 3)) {
-	        	column.setMaxWidth(50);
-	        } else if (i == 2) {
-	        	column.setMaxWidth(40);
-	        } else if (i == 4) {
-	        	column.setMaxWidth(75);
-	        }
-	    }
+		Task task = new Task();
+		//task.addPropertyChangeListener(controller);
+		task.execute();
 		revalidate();
 		repaint();
 	}
+	
+	class Task extends SwingWorker<Void, Void> {
+        /*
+         * Main task. Executed in background thread.
+         */
+        @Override
+        public Void doInBackground() {
+            int progress = 0;
+        	ArrayList<Result> resultList = model.getResultList();
+    		resultTableModel.setColumnCount(5);
+    		resultTableModel.setRowCount(0);
+    		int increment = 100/resultList.size();
+    		System.out.println(increment);
+    		for (Result res : resultList) {
+    			try {
+    				Thread.sleep(500);
+    			} catch (InterruptedException ignore) {}
+    			Object[] temp = new Object[] { res.getItemName(),
+    											res.getPrice(),
+    											res.getVolumn(),
+    											res.getMedian(),
+    											res.getDate() };
+    			resultTableModel.addRow(temp);
+    			progress += increment;
+    			progressBar.setValue(Math.min(progress, 100));
+    		}
+    		progressBar.setValue(100);
+    		
+    		resultTableModel.fireTableDataChanged();
+    		TableColumn column = null;
+    		for (int i = 0; i < 5; i++) {
+    	        column = resultBox.getColumnModel().getColumn(i);
+    	        if ((i == 1)||(i == 3)) {
+    	        	column.setMaxWidth(50);
+    	        } else if (i == 2) {
+    	        	column.setMaxWidth(40);
+    	        } else if (i == 4) {
+    	        	column.setMaxWidth(75);
+    	        }
+    	    }
+            return null;
+        }
+ 
+        /*
+         * Executed in event dispatching thread
+         */
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+        }
+    }
 }

@@ -2,9 +2,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
+import javax.swing.JProgressBar;
 
 class Controller implements ActionListener, ComponentListener {
 	private Model model;
